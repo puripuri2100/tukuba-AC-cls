@@ -18,7 +18,7 @@ jobs:
           opam update
           opam install satysfi-base satysfi-ruby satysfi-texlogo satysfi-uline satysfi-num-conversion
           satyrographos install
-          satsyfi demo.saty
+          satysfi demo.saty
       - run: |
           mkdir -p pages
           cp -f demo.pdf pages
