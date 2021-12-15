@@ -1,0 +1,642 @@
+@require: math
+@require: gr
+@require: footnote-scheme
+@require: color
+@require: annot
+@require: image/image
+@require: vdecoset
+@require: base/int
+@require: num-conversion/num-conversion
+
+@import: fonts
+@import: bib
+@import: bib-lst
+
+
+module AC: sig
+
+  val document : block-text -> block-text -> block-text -> document
+
+  direct \ref : [string] inline-cmd
+  direct \ref-page : [string] inline-cmd
+  direct +chapter : [string?; inline-text; block-text] block-cmd
+  direct +section : [string?; inline-text; block-text] block-cmd
+  direct +subsection : [string?; inline-text; block-text] block-cmd
+  direct +subsubsection : [string?; inline-text; block-text] block-cmd
+  direct +p : [inline-text] block-cmd
+  direct +pn : [inline-text] block-cmd
+  direct +figure : [string?; inline-text; block-text] block-cmd
+  direct \footnote : [inline-text] inline-cmd
+  direct +center : [inline-text] block-cmd
+  direct \url : [string] inline-cmd
+  direct +clear-page : [] block-cmd
+
+end = struct
+
+
+
+% (フォント名, フォントサイズ補正, ベースライン補正)
+%let font-latin-roman = (`Junicode`, font-ratio-latin, 0.)
+%let font-latin-bold = (`Junicode-b`, font-ratio-latin, 0.)
+%let font-latin-italic = (`Junicode-it`, font-ratio-latin, 0.)
+%let font-latin-sans = (`lmsans`, font-ratio-latin, 0.)
+%let font-latin-mono = (`lmmono`, font-ratio-latin, 0.)
+%let font-cjk-mincho = (`ipaexm`, font-ratio-cjk, 0.)
+%let font-cjk-gothic = (`ipaexg`, font-ratio-cjk, 0.)
+
+
+
+let page-width = 210mm
+let page-height = 297mm
+let top-space = 20mm
+let bottom-space = 20mm
+
+let font-size-normal = 12pt
+let font-size-chapter = 20pt
+let font-size-section = 18pt
+let font-size-subsection = 16pt
+let font-size-subsubsection = 14pt
+
+let left-space = (page-width -' ((font-size-normal *' font-ratio-cjk) *' 40.0)) *' 0.6
+let right-space = (page-width -' ((font-size-normal *' font-ratio-cjk) *' 40.0)) *' 0.4
+let text-width = page-width -' left-space -' right-space
+
+
+
+
+
+% 相互参照用のコマンド
+
+  % 追加用関数
+    % section番号等は、識別のために :num を付け、ページ番号は :page を付ける
+
+    % unit型
+    let register-cross-reference-num label title =
+      register-cross-reference (label ^ `:num`) title
+
+
+    % inline-boxes型
+    let register-cross-reference-page label =
+      hook-page-break (fun pbinfo _ -> register-cross-reference (label ^ `:page`) (arabic pbinfo#page-number))
+
+
+
+    let register-cross-reference-page-block label =
+      hook-page-break-block (fun pbinfo _ -> register-cross-reference (label ^ `:page`) (arabic pbinfo#page-number))
+
+
+
+  let set-hook-start-page () = register-cross-reference-page-block `start-page`
+  let get-start-page () =
+    match get-cross-reference `start-page:page` with
+    | None -> 0
+    | Some(s) -> (
+      match Int.of-string-opt s with
+      | None -> 0
+      | Some(i) -> i
+    )
+
+
+  % 取得用関数 返り値はどちらもstring型
+  let get-cross-reference-num label =
+    match get-cross-reference (label ^ `:num`) with
+      | None -> `?`
+      | Some (num) -> num
+
+
+  let get-cross-reference-page label =
+    match get-cross-reference (label ^ `:page`) with
+      | None -> `?`
+      | Some (page) -> (
+        let start-page = get-start-page () in
+        match Int.of-string-opt page with
+        | None -> page
+        | Some(i) -> (
+          if i <= start-page then
+            match i |> NumConversion.to-roman-lower with
+            | None -> (i - start-page) |> arabic
+            | Some(s) -> s
+          else
+            (i - start-page) |> arabic
+        )
+      )
+
+
+  % ハイパーリンクのキー登録とキー取得
+
+  % 登録 string -> inline-boxes -> inline-boxes
+  let register-location-frame key ib =
+    inline-frame-breakable (0pt, 0pt, 0pt, 0pt)
+      (Annot.register-location-frame key) ib
+
+
+  % 取得 string -> inline-boxes -> inline-boxes
+  let link-to-location-frame key ib =
+    inline-frame-breakable (0pt, 0pt, 0pt, 0pt)
+      (Annot.link-to-location-frame key None) ib
+
+
+  % \ref \ref-page 定義
+  let-inline ctx \ref key =
+    link-to-location-frame key
+      (read-inline ctx (embed-string (get-cross-reference-num key)))
+
+
+  let-inline ctx \ref-page key =
+    link-to-location-frame key
+      (read-inline ctx (embed-string (get-cross-reference-page key)))
+
+
+
+% 本文用設定
+
+  % フォントサイズ
+  let font-size-normal = 12pt
+  let font-size-title = 20pt
+  let font-size-author = 16pt
+  let font-size-date = 16pt
+  let font-size-section = 20pt
+  let font-size-subsection = 16pt
+
+
+  % 基本となるctxの設定
+  let ctx-get-initial-context l-width =
+    get-initial-context l-width (command \math)
+      |> set-font-size font-size-normal
+      |> set-dominant-wide-script Kana
+      |> set-language Kana Japanese
+      |> set-language HanIdeographic Japanese
+      |> set-cjk-font font-cjk-mincho
+      |> set-dominant-narrow-script Latin
+      |> set-language Latin English
+      |> set-latin-font font-latin-roman
+      |> set-other-font font-latin-roman
+      |> set-hyphen-penalty 100
+      |> set-math-font `lmodern`
+      |> set-manual-rising 0pt
+      |> set-text-color Color.black
+
+
+% 目次用設定
+
+  % 目次の「.........」を実装するための関数
+
+  % 回数分だけ同じ it を接続する関数
+  let-rec repeat-inline n ib =
+    if n <= 0 then inline-nil else
+      ib ++ (repeat-inline (n - 1) ib)
+
+  % {.}を(text-width /' get-natural-width {.})文だけ繰り返しつなげる
+  let make-dots-line ctx text-width =
+    let ib = read-inline ctx {.} ++ inline-skip 1pt in
+    let n = round (text-width /' (get-natural-width ib)) in
+      repeat-inline n ib ++ inline-fil
+
+
+% 目次の階層を付けるための型の宣言
+  type toc-cls =
+    | Title of string * inline-text
+    | Chapter of string * inline-text
+    | Section of string * inline-text
+    | SubSection of string * inline-text
+    | SubSubSection of string * inline-text
+
+let-mutable toc-list <- []
+
+
+  let make-toc-title ctx text-width label title =
+    let ctx =
+      ctx |> set-font-size 16pt
+    in
+    let it-page = embed-string (get-cross-reference-page label) in
+    let ib-num = inline-skip 3pt ++  read-inline ctx {#title;} ++ inline-skip 3pt in
+    let ib-page = inline-skip 3pt ++ read-inline ctx {#it-page;} ++ inline-skip 3pt in
+      line-break true true ctx
+        (link-to-location-frame label (ib-num ++ inline-fil ++ ib-page))
+
+
+% Chapter用
+  let make-toc-chapter ctx text-width label title =
+    let ctx =
+      ctx |> set-font-size 16pt
+    in
+    let it-num = embed-string (get-cross-reference-num label) in
+    let it-page = embed-string (get-cross-reference-page label) in
+    let ib-num = inline-skip 3pt ++  read-inline ctx {#it-num;#title;} ++ inline-skip 3pt in
+    let ib-page = inline-skip 3pt ++ read-inline ctx {#it-page;} ++ inline-skip 3pt in
+      line-break true true ctx
+        (link-to-location-frame label (ib-num ++ inline-fil ++ ib-page))
+
+
+% Section用
+  let make-toc-section ctx text-width label title =
+    let it-num = embed-string (get-cross-reference-num label) in
+    let it-page = embed-string (get-cross-reference-page label) in
+    let ib-num = inline-skip 12pt ++  read-inline ctx {#it-num;#title;} ++ inline-skip 3pt in
+    let ib-page = inline-skip 3pt ++ read-inline ctx {#it-page;} ++ inline-skip 3pt in
+    let ib-toc-line =
+      let w = text-width -' (get-natural-width ib-num) -'
+        (get-natural-width ib-page)
+      in
+        make-dots-line ctx w
+    in
+      line-break true true ctx
+        (link-to-location-frame label (ib-num ++ ib-toc-line ++ inline-fil ++ ib-page))
+
+
+  let make-toc-subsection ctx text-width label title =
+    let it-num = embed-string (get-cross-reference-num label) in
+    let it-page = embed-string (get-cross-reference-page label) in
+    let ib-num = inline-skip 24pt ++  read-inline ctx {#it-num;#title;} ++ inline-skip 3pt in
+    let ib-page = inline-skip 3pt ++ read-inline ctx {#it-page;} ++ inline-skip 3pt in
+    let ib-toc-line =
+      let w = text-width -' (get-natural-width ib-num) -'
+        (get-natural-width ib-page)
+      in
+        make-dots-line ctx w
+    in
+      line-break true true ctx
+        (link-to-location-frame label (ib-num ++ ib-toc-line ++ inline-fil ++ ib-page))
+
+
+% しおり作成用
+let-mutable outline-lst <- []
+
+
+let document preamble main end-part =
+  let () = FootnoteScheme.initialize () in
+  let ctx-doc = ctx-get-initial-context text-width in
+  let bb-preamble =
+    let label = `preamble` in
+    let ctx =
+      ctx-doc |> set-cjk-font font-cjk-gothic
+              |> set-latin-font font-latin-sans
+              |> set-font-size font-size-chapter
+    in
+    let it-title = {はじめに} in
+    let ib-title = register-location-frame label (read-inline ctx it-title) in
+    let ib-title-link = register-cross-reference-page label in
+    let () = outline-lst <- (1, `はじめに`, label, true) :: !outline-lst in
+    let () = toc-list <- (Title (label, it-title)) :: !toc-list in
+    let bb-title = line-break true false ctx (ib-title ++ ib-title-link ++ inline-fil) in
+    let bb-main = read-block ctx-doc preamble in
+    bb-title +++ block-skip 20pt +++ bb-main
+  in
+  let toc-label = `toc` in
+  let () = outline-lst <- (1, `目次`, toc-label, true) :: !outline-lst in
+  let () = toc-list <- (Title (toc-label, {目次})) :: !toc-list in
+  let bb-main = read-block ctx-doc main in
+  let bb-end-part =
+    let label = `end-part` in
+    let ctx =
+      ctx-doc |> set-cjk-font font-cjk-gothic
+              |> set-latin-font font-latin-sans
+              |> set-font-size font-size-chapter
+    in
+    let it-title = {おわりに} in
+    let ib-title = register-location-frame label (read-inline ctx it-title) in
+    let ib-title-link = register-cross-reference-page label in
+    let () = outline-lst <- (1, `おわりに`, label, true) :: !outline-lst in
+    let () = toc-list <- (Title (label, it-title)) :: !toc-list in
+    let bb-title = line-break true false ctx (ib-title ++ ib-title-link ++ inline-fil) in
+    let bb-main = read-block ctx-doc end-part in
+    bb-title +++ block-skip 20pt +++ bb-main
+  in
+  let bb-chart =
+    let text1 = {この自己推薦書の章立ては以下の図のような構成となっている。} in
+    let ib-text1 = inline-fil ++ read-inline ctx-doc text1 ++ inline-fil in
+    let bb-text1 = line-break true false ctx-doc ib-text1 in
+    let it-fig = {\include-pdf(1)(`chart.pdf`);} in
+    let ib-fig = inline-fil ++ read-inline ctx-doc it-fig ++ inline-fil in
+    let bb-fig = line-break false true ctx-doc ib-fig in
+    block-skip 30pt +++ bb-text1 +++ block-skip 10pt +++ bb-fig
+  in
+  let bb-toc =
+    let bb-toc-main = !toc-list |> List.reverse |> List.map (fun list -> (
+      match list with
+        | Title (label, title) -> make-toc-title ctx-doc text-width label title
+        | Chapter (label, title) -> make-toc-chapter ctx-doc text-width label title
+        | Section (label, title) -> make-toc-section ctx-doc text-width label title
+        | SubSection (label, title) -> make-toc-subsection ctx-doc text-width label title
+        | _ -> block-nil
+    )) |> List.fold-left (+++) block-nil
+    in
+    let ib-title-link = register-cross-reference-page toc-label in
+    let bb-toc-title =
+      let ctx-toc-main-title = ctx-doc
+        |> set-font-size font-size-section
+        |> set-cjk-font font-cjk-gothic
+        |> set-latin-font font-latin-sans
+        |> set-paragraph-margin 20pt 12pt
+      in
+        line-break true false ctx-doc (
+          register-location-frame toc-label (read-inline ctx-toc-main-title {目次})
+            ++ ib-title-link ++ inline-fil
+          )
+    in
+      bb-toc-title +++ bb-toc-main
+  in
+
+  let hook-start-page = set-hook-start-page () in
+  let start-page = get-start-page () in
+
+  let bb-bib =
+    let main = Bib.bib-make ctx-doc bib-lst in
+    let ctx =
+      ctx-doc |> set-cjk-font font-cjk-gothic
+              |> set-latin-font font-latin-sans
+              |> set-font-size font-size-chapter
+    in
+    let title = read-inline ctx {参考文献} in
+    let bb-title = line-break true false ctx (title ++ inline-fil) in
+    block-skip 20pt +++ bb-title +++ main
+  in
+
+  let page = UserDefinedPaper(page-width, page-height) in
+
+  let pagecontf pbinfo =
+    let () = FootnoteScheme.start-page () in
+    (|
+      text-height = page-height -' (top-space +' bottom-space);
+      text-origin = (left-space, top-space);
+    |)
+  in
+
+  let pagepartsf pbinfo =
+    let ctx = set-paragraph-margin 0pt 0pt ctx-doc in
+    let header = block-nil in
+    let header-origin = (left-space, 0pt) in
+    let page-num = pbinfo#page-number in
+    let footer =
+      if page-num <= start-page then
+        let s-page-num =
+          match page-num |> NumConversion.to-roman-lower with
+          | None -> arabic page-num
+          | Some(s) -> s
+        in
+        let it-page-num = s-page-num |> embed-string in
+        let footer-main =
+          line-break true true ctx (inline-fil ++ (read-inline ctx {#it-page-num;}) ++ inline-fil)
+        in
+        block-skip (bottom-space *' 0.2) +++ footer-main
+      else
+        let it-page-num = (page-num - start-page) |> arabic |> embed-string in
+        let footer-main =
+          line-break true true ctx (inline-fil ++ (read-inline ctx {#it-page-num;}) ++ inline-fil)
+        in
+        block-skip (bottom-space *' 0.2) +++ footer-main
+    in
+    let footer-origin = (left-space, page-height -' bottom-space) in
+    (|
+      header-content = header;
+      header-origin = header-origin;
+      footer-content = footer;
+      footer-origin = footer-origin;
+    |)
+  in
+
+  let doc-main =
+    page-break page pagecontf pagepartsf
+      (bb-preamble +++ clear-page +++ bb-chart +++ clear-page +++ bb-toc
+        +++ hook-start-page +++ bb-main +++ clear-page +++ bb-end-part +++ clear-page +++ bb-bib)
+  in
+  let () = register-outline (List.reverse !outline-lst) in
+    doc-main
+
+
+
+let-mutable chapter-num <- 0
+let-mutable section-num <- 0
+let-mutable subsection-num <- 0
+let-mutable subsubsection-num <- 0
+
+
+let make-chapter ctx label title inner =
+  let () = chapter-num <- !chapter-num + 1 in
+  let () = section-num <- 0 in
+  let () = subsection-num <- 0 in
+  let () = subsubsection-num <- 0 in
+  let s-num = arabic !chapter-num ^ `. `# in
+  let ctx-title =
+    ctx |> set-font-size font-size-chapter
+        |> set-cjk-font font-cjk-gothic
+        |> set-latin-font font-latin-sans
+  in
+  let ib-title =
+    register-location-frame label (read-inline ctx-title title)
+  in
+  let s-title = extract-string ib-title in
+  let ib-title-link = register-cross-reference-page label in
+  let () = register-cross-reference-num label s-num in
+  let () = outline-lst <- (1, s-num ^ s-title, label, true) :: !outline-lst in
+  let () = toc-list <- (Chapter (label, title)) :: !toc-list in
+  let ib-num = read-inline ctx-title (embed-string s-num) in
+  let bb-title =
+    line-break true false ctx (ib-num ++ ib-title ++ ib-title-link ++ inline-fil)
+  in
+  let bb-inner = read-block ctx inner in
+    bb-title +++ bb-inner
+
+
+let make-section ctx label title inner =
+  let () = section-num <- !section-num + 1 in
+  let () = subsection-num <- 0 in
+  let () = subsubsection-num <- 0 in
+  let s-num = arabic !chapter-num ^ `.` ^ arabic !section-num ^ `. `# in
+  let ctx-title =
+    ctx |> set-font-size font-size-section
+        |> set-cjk-font font-cjk-gothic
+        |> set-latin-font font-latin-sans
+  in
+  let ib-title =
+    register-location-frame label (read-inline ctx-title title)
+  in
+  let s-title = extract-string ib-title in
+  let ib-title-link = register-cross-reference-page label in
+  let () = register-cross-reference-num label s-num in
+  let () = outline-lst <- (2, s-num ^ s-title, label, false) :: !outline-lst in
+  let () = toc-list <- (Section (label, title)) :: !toc-list in
+  let ib-num = read-inline ctx-title (embed-string s-num) in
+  let bb-title =
+    line-break true false ctx (ib-num ++ ib-title ++ ib-title-link ++ inline-fil)
+  in
+  let bb-inner = read-block ctx inner in
+    bb-title +++ bb-inner
+
+
+let make-subsection ctx label title inner =
+  let () = subsection-num <- !subsection-num + 1 in
+  let () = subsubsection-num <- 0 in
+  let s-num = arabic !chapter-num ^ `.` ^ arabic !section-num^ `.` ^ arabic !subsection-num ^ `. `# in
+  let ctx-title =
+    ctx |> set-font-size font-size-subsection
+        |> set-cjk-font font-cjk-gothic
+        |> set-latin-font font-latin-sans
+  in
+  let ib-title =
+    register-location-frame label (read-inline ctx-title title)
+  in
+  let s-title = extract-string ib-title in
+  let ib-title-link = register-cross-reference-page label in
+  let () = register-cross-reference-num label s-num in
+  let () = outline-lst <- (3, s-num ^ s-title, label, false) :: !outline-lst in
+  let () = toc-list <- (SubSection (label, title)) :: !toc-list in
+  let ib-num = read-inline ctx-title (embed-string s-num) in
+  let bb-title =
+    line-break true false ctx (ib-num ++ ib-title ++ ib-title-link ++ inline-fil)
+  in
+  let bb-inner = read-block ctx inner in
+    bb-title +++ bb-inner
+
+
+let make-subsubsection ctx label title inner =
+  let () = subsubsection-num <- !subsubsection-num + 1 in
+  let s-num = arabic !chapter-num ^ `.` ^ arabic !section-num^ `.` ^ arabic !subsection-num^ `.` ^ arabic !subsubsection-num ^ `. `# in
+  let ctx-title =
+    ctx |> set-font-size font-size-subsubsection
+        |> set-cjk-font font-cjk-gothic
+        |> set-latin-font font-latin-sans
+  in
+  let ib-title =
+    register-location-frame label (read-inline ctx-title title)
+  in
+  let s-title = extract-string ib-title in
+  let ib-title-link = register-cross-reference-page label in
+  let () = register-cross-reference-num label s-num in
+  let () = outline-lst <- (4, s-num ^ s-title, label, false) :: !outline-lst in
+  let () = toc-list <- (SubSubSection (label, title)) :: !toc-list in
+  let ib-num = read-inline ctx-title (embed-string s-num) in
+  let bb-title =
+    line-break true false ctx (ib-num ++ ib-title ++ ib-title-link ++ inline-fil)
+  in
+  let bb-inner = read-block ctx inner in
+    bb-title +++ bb-inner
+
+
+
+let-mutable chapter-count <- 0
+let-mutable section-count <- 0
+let-mutable subsection-count <- 0
+let-mutable subsubsection-count <- 0
+
+let-block ctx +chapter ?:labelopt title inner =
+  let label =
+    match labelopt with
+    | None -> `chapter:` ^ (arabic !chapter-count)
+    | Some(s) -> s
+  in
+  let () = chapter-count <- !chapter-count + 1 in
+    clear-page +++ (make-chapter ctx label title inner)
+
+let-block ctx +section ?:labelopt title inner =
+  let label =
+    match labelopt with
+    | None -> `section:` ^ (arabic !section-count)
+    | Some(s) -> s
+  in
+  let () = section-count <- !section-count + 1 in
+    make-section ctx label title inner
+
+let-block ctx +subsection ?:labelopt title inner =
+  let label =
+    match labelopt with
+    | None -> `subsection:` ^ (arabic !subsection-count)
+    | Some(s) -> s
+  in
+  let () = subsection-count <- !subsection-count + 1 in
+    make-subsection ctx label title inner
+
+let-block ctx +subsubsection ?:labelopt title inner =
+  let label =
+    match labelopt with
+    | None -> `subsubsection:` ^ (arabic !subsubsection-count)
+    | Some(s) -> s
+  in
+  let () = subsubsection-count <- !subsubsection-count + 1 in
+    make-subsubsection ctx label title inner
+
+
+
+
+let indent ctx = inline-skip ((get-font-size ctx) *' font-ratio-cjk)
+
+let-block ctx +p inner =
+  let ib-indent = indent ctx in
+  let ib-inner = read-inline ctx inner in
+    line-break true true ctx (ib-indent ++ ib-inner ++ inline-fil)
+
+let-block ctx +pn inner =
+  let ib-inner = read-inline ctx inner in
+    line-break true true ctx (ib-inner ++ inline-fil)
+
+
+
+let-inline ctx \footnote it =
+  let font-size = get-font-size ctx in
+  let ibf num =
+    let it-num = num |> arabic |> embed-string in
+    let ctx =
+      ctx |> set-font-size (font-size *' 0.75)
+          |> set-manual-rising (font-size *' 0.5)
+    in
+    let it = {†#it-num;} in
+    read-inline ctx it
+  in
+  let bbf num =
+    let ctx =
+      ctx |> set-paragraph-margin 6pt 6pt
+          |> set-leading 5pt
+    in
+    let it-num = num |> arabic |> embed-string in
+    let ib-num = read-inline ctx {#it-num;：} in
+    let ib-num-width = get-natural-width ib-num in
+    let ib = read-inline ctx it in
+    let f ctx =
+      line-break true true ctx (inline-skip (ib-num-width *' (float (-1))) ++ ib-num ++ ib ++ inline-fil)
+    in
+    block-frame-breakable ctx (ib-num-width,0pt,0pt,0pt) VDecoSet.empty f
+  in
+  FootnoteScheme.main ctx ibf bbf
+
+
+
+let-block ctx +center it =
+  line-break true true ctx (inline-fil ++ (read-inline ctx it) ++ inline-fil)
+
+
+let-inline ctx \url url =
+  let ctx =
+    ctx |> set-hyphen-penalty 100000
+  in
+  let it = {\uline{\href (url) (embed-string url);}} in
+  read-inline ctx it
+
+
+
+let-mutable figure-num <- 0
+let-block ctx +figure ?:labelopt caption inner =
+  let () = figure-num <- !figure-num + 1 in
+  let label =
+    match labelopt with
+    | None -> `figure:` ^ (arabic !figure-num)
+    | Some(s) -> s
+  in
+  let s-num = arabic !figure-num in
+  let ib-caption =
+    register-location-frame label (read-inline ctx caption)
+  in
+  let ib-caption-link = register-cross-reference-page label in
+  let () = register-cross-reference-num label s-num in
+  let it-num = embed-string s-num in
+  let ib-num = read-inline ctx {図#it-num;} in
+  let ib-caption-main = ib-num ++ inline-skip 5pt ++ ib-caption ++ ib-caption-link in
+  let bb-caption =
+    line-break false true ctx (inline-fil ++ ib-caption-main ++ inline-fil)
+  in
+  let bb-inner = read-block ctx inner in
+    bb-inner +++ bb-caption
+
+
+let-block ctx +clear-page = clear-page
+
+end

@@ -1,0 +1,44 @@
+digraph graphname {
+  graph [
+    charset = "UTF-8",
+    rankdir = TB,
+    nodesep = 1.1,
+    ranksep = 1.05,
+    compound = true
+  ];
+
+  node [
+    shape = record,
+    fontname = "Migu 1M",
+    fontsize = 12,
+  ];
+
+
+
+  chap1sec [label = "{<p1>カスタマイズ可能な\nクラスファイルの作成|<p2>SATySFi本体への\n機能追加|<p3>SATySFiライブラリ作成|<p4>mdbook-satysfiの作成|<p5>llmakerの作成|<p6>ソフトウェア会議の主催}"]
+
+  chap2sec [label = "{<p1>文化祭準備委員会での\n貸出管理作業の改善|<p2>部誌作成の自動化|<p3>運動会パンフレット作成}"]
+
+
+  subgraph cluster_chap1sec2 {
+    chap1sec2subsec [label = "{<p1>string-explode\n関数の追加|<p2>外部ファイル読み込み\n機能の追加|<p3>ファイル情報\n埋め込み機能の追加}"]
+  };
+
+  subgraph cluster_chap1sec3 {
+    chap1sec3subsec [label = "{<p1>satysfi-rubyの作成|<p2>satysfi-jsonの作成|<p3>satysfi-md2latexの作成|<p4>satysfi-twemojiの開発}"]
+  };
+
+
+
+
+
+
+  "自己推薦書" -> chap1sec:p1 [headport=n, tailport = w, label = "OSS活動"];
+  "自己推薦書" -> chap2sec:p1 [headport=n, tailport = e, label = "学校活動"];
+
+  chap1sec:p2 -> chap1sec2subsec:p1 [lhead = "cluster_chap1sec2", headport=n];
+  chap1sec:p3 -> chap1sec3subsec:p1 [lhead = "cluster_chap1sec3", headport=n];
+
+  chap1sec3subsec:p4 -> "ペン剣基金" [headport=w]
+
+}

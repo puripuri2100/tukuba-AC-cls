@@ -1,0 +1,59 @@
+digraph graphname {
+  graph [
+    charset = "UTF-8",
+    rankdir = TB,
+    nodesep = 1.1,
+    ranksep = 1.05,
+    compound = true
+  ];
+
+  node [
+    shape = record,
+    fontname = "Migu 1M",
+    fontsize = 12,
+  ];
+
+  std [label = "{<math>math|<gr>gr|<footnotescheme>footnote-scheme|<color>color|<annot>annot|<vdecoset>vdecoset|<code>code|<itemize>itemize}"]
+  base [label = "{<int>int|<listext>list-ext|<ord>ord}"]
+
+  import [label = "{<bib>bib.satyh|<fonts>fonts.satyg|<bib-lst>bib-lst.satyg|<accls>ac-cls.satyh}"]
+
+  packages [label = "{<num>num-conversion/num-conversion|<image>image/image|<uline>uline/uline|<ruby>ruby/ruby|<texlogo>texlogo/texlogo}"]
+
+  import:fonts -> import:accls;
+  import:bib -> import:accls;
+  import:biblst -> import:accls;
+  std:math -> import:accls;
+  std:gr -> import:accls;
+  std:footnotescheme -> import:accls;
+  std:color -> import:accls;
+  std:annot -> import:accls;
+  packages:image -> import:accls;
+  std:vdecoset -> import:accls;
+  base:int -> import:accls;
+  packages:num -> import:accls;
+
+
+  import:fonts -> import:bib;
+  base:listext -> import:bib;
+  base:int -> import:bib;
+  base:ord -> import:bib;
+  std:annot -> import:bib;
+  std:vdecoset -> import:bib;
+
+
+  import:bib -> import:biblst;
+  import:fonts -> import:biblst;
+
+
+  import:accls -> "demo.saty";
+  import:fonts -> "demo.saty";
+  std:itemize -> "demo.saty";
+  std:color -> "demo.saty";
+  std:code -> "demo.saty";
+  packages:uline -> "demo.saty";
+  packages:image -> "demo.saty";
+  packages:texlogo -> "demo.saty";
+  packages:ruby -> "demo.saty";
+
+}

@@ -1,0 +1,58 @@
+
+% フォントサイズ補正
+let font-ratio-latin = 1.
+let font-ratio-cjk = 0.88
+
+let font-latin-roman = (`fonts-noto-serif:NotoSerif-SemiCondensed`, font-ratio-latin, 0.)
+let font-latin-bold = (`fonts-noto-sans:NotoSans-SemiBold`, font-ratio-latin, 0.)
+let font-latin-italic = (`fonts-noto-serif:NotoSerif-Italic`, font-ratio-latin, 0.)
+let font-latin-sans = (`fonts-noto-sans:NotoSans-Regular`, font-ratio-latin, 0.)
+let font-latin-mono = (`lmmono`, font-ratio-latin, 0.)
+let font-cjk-mincho = (`fonts-noto-serif-cjk-jp:NotoSerifCJKjp-Regular`, font-ratio-cjk, 0.)
+let font-cjk-gothic = (`fonts-noto-sans-cjk-jp:NotoSansCJKjp-Regular`, font-ratio-cjk, 0.)
+let font-cjk-gothic-b = (`fonts-noto-sans-cjk-jp:NotoSansCJKjp-Medium`, font-ratio-cjk, 0.)
+let font-emoji = (`fonts-noto-emoji:NotoEmoji-Regular`, font-ratio-latin, 0.)
+
+
+let set-cjk-font font-name ctx =
+  ctx |> set-font HanIdeographic font-name
+      |> set-font Kana font-name
+
+
+let set-latin-font font-name ctx =
+  ctx |> set-font Latin font-name
+
+
+let set-other-font font-name ctx =
+  ctx |> set-font OtherScript font-name
+
+
+let-inline ctx \cjk it =
+  let ctx =
+    ctx
+    |> set-latin-font font-cjk-mincho
+    |> set-cjk-font font-cjk-mincho
+    |> set-other-font font-cjk-mincho
+  in
+  read-inline ctx it
+
+
+let-inline ctx \latin it =
+  let ctx =
+    ctx
+    |> set-latin-font font-latin-roman
+    |> set-cjk-font font-latin-roman
+    |> set-other-font font-latin-roman
+  in
+  read-inline ctx it
+
+
+let-inline ctx \emoji it =
+  let ctx =
+    ctx
+    |> set-latin-font font-emoji
+    |> set-cjk-font font-emoji
+    |> set-other-font font-emoji
+  in
+  read-inline ctx it
+

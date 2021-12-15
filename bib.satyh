@@ -1,0 +1,216 @@
+@require: base/list-ext
+@require: base/int
+@require: base/ord
+@require: annot
+@require: vdecoset
+
+@import: fonts
+
+type bib-book =
+  (|
+    authors : inline-text list;
+    title : inline-text;
+    publisher : inline-text;
+    year : int;
+  |)
+
+type bib-web =
+  (|
+    authors : inline-text list;
+    title : inline-text;
+    url : string;
+    year : int option;
+    cited : int * int * int;
+  |)
+
+
+type bib =
+  | WebSite of bib-web
+  | Book of bib-book
+
+module Bib : sig
+
+  val bib-make : context ->(string * bib) list -> block-boxes
+  direct \cite : [string list] inline-cmd
+  direct \github : [inline-text] inline-cmd
+
+end = struct
+
+
+let-inline ctx \github id =
+  let ctx =
+    ctx |> set-latin-font font-latin-bold
+        |> set-cjk-font font-cjk-gothic
+  in
+  read-inline ctx id
+
+let register-cross-reference-bib label title =
+  register-cross-reference (label ^ `:bib`) title
+
+
+% 登録 string -> inline-boxes -> inline-boxes
+let register-location-frame key ib =
+  inline-frame-breakable (0pt, 0pt, 0pt, 0pt)
+    (Annot.register-location-frame key) ib
+
+
+% 取得 string -> inline-boxes -> inline-boxes
+let link-to-location-frame key ib =
+  inline-frame-breakable (0pt, 0pt, 0pt, 0pt)
+    (Annot.link-to-location-frame key None) ib
+
+
+let get-cross-reference-bib-opt label =
+  match get-cross-reference (label ^ `:bib`) with
+    | None -> None
+    | Some (label) -> (
+      match Int.of-string-opt label with
+      | None -> None
+      | Some(i) -> Some(i)
+    )
+
+
+let-inline ctx \cite labels =
+  let ord =
+    Ord.make (fun i-opt j-opt -> (
+      let (_, i-opt) = i-opt in
+      let (_, j-opt) = j-opt in
+      match (i-opt, j-opt) with
+      | (None, None) -> Eq
+      | (None, Some(_)) -> Lt
+      | (Some(_), None) -> Gt
+      | (Some(i), Some(j)) -> if i == j then Eq else if i < j then Lt else Gt
+    ))
+  in
+  let to-ib (label,i-opt) =
+    let s =
+      match i-opt with
+      | None -> `?`
+      | Some(i) -> arabic i
+    in
+    let ib = s |> embed-string |> read-inline ctx in
+    link-to-location-frame label ib
+  in
+  let comma =
+    read-inline ctx {,}
+  in
+  let join-f i ib1 ib2 =
+    if i <= 0 then
+      ib2
+    else
+      ib1 ++ comma ++ inline-skip 4pt ++ ib2
+  in
+  let open-bracket = `[` |> embed-string |> read-inline ctx in
+  let close-bracket = `]` |> embed-string |> read-inline ctx in
+  let ib =
+    labels
+    |> List.map (fun label -> (label, get-cross-reference-bib-opt label))
+    |> List.mergesort ord
+    |> List.map to-ib
+    |> List.fold-lefti join-f inline-nil
+  in
+  open-bracket ++ ib ++ close-bracket
+
+
+let-inline ctx \may-break =
+    discretionary 0 inline-nil inline-fil inline-nil
+
+
+let-inline ctx \url url =
+  let ctx =
+    ctx |> set-latin-font font-latin-mono
+        |> set-cjk-font font-cjk-gothic
+        |> set-hyphen-penalty 100000
+  in
+  let it-url = embed-string url in
+  read-inline ctx {\href (url) (it-url);}
+
+let-inline ctx \book-title title =
+  let ctx =
+    ctx |> set-latin-font font-latin-italic
+        |> set-cjk-font font-cjk-mincho
+  in
+  read-inline ctx title
+
+
+let join-authors lst =
+  match List.reverse lst with
+  | [] -> {}
+  | [it] -> it
+  | it2::it1::[] -> {#it1; and #it2;}
+  | it-last :: it-rest -> (
+    let it =
+      it-rest |> List.reverse |> List.fold-left (fun itacc it -> (
+        {#itacc;#it;,\ }
+      )) {}
+    in
+      {#it;and #it-last;}
+  )
+
+
+
+let bib-make ctx lst =
+  let map-f i (label, bib) =
+    let () = register-cross-reference-bib label (arabic (i + 1)) in
+    match bib with
+    | WebSite(item) -> (
+      let authors = item#authors in
+      let it-authors = join-authors authors in
+      let title = item#title in
+      let url = item#url in
+      let year-opt = item#year in
+      let it-year =
+        match year-opt with
+        | None -> {}
+        | Some(year) -> (
+          let it = year |> arabic |> embed-string in
+          {, #it;}
+        )
+      in
+      let (cited-year, cited-month, cited-day) = item#cited in
+      let it-cited =
+        let it-year = cited-year |> arabic |> embed-string in
+        let it-month = cited-month |> arabic |> embed-string in
+        let it-day = cited-day |> arabic |> embed-string in
+        {#it-year;-#it-month;-#it-day;}
+      in
+      let ib =
+        read-inline ctx {#it-authors;. "\book-title{#title;}".\may-break; \url(url);#it-year;. (accessed #it-cited;).}
+      in
+      let it-num = (i + 1) |> arabic |> embed-string in
+      let ib-num =
+        register-location-frame label (read-inline ctx {[#it-num;]})
+      in
+      let ib-num-width = get-natural-width ib-num in
+      let f ctx =
+        line-break true true ctx (inline-skip ((ib-num-width +' 6pt) *' (float (-1))) ++ ib-num ++ inline-skip 6pt ++ ib ++ inline-fil)
+      in
+      block-frame-breakable ctx (ib-num-width +' 6pt,0pt,0pt,0pt) VDecoSet.empty f
+    )
+    | Book(item) -> (
+      let authors = item#authors in
+      let it-authors = join-authors authors in
+      let title = item#title in
+      let publisher = item#publisher in
+      let year = item#year in
+      let it-year = year |> arabic |> embed-string in
+      let ib =
+        read-inline ctx {#it-authors;. "\book-title{#title;}". #publisher;, #it-year;.}
+      in
+      let it-num = (i + 1) |> arabic |> embed-string in
+      let ib-num =
+        register-location-frame label (read-inline ctx {[#it-num;]})
+      in
+      let ib-num-width = get-natural-width ib-num in
+      let f ctx =
+        line-break true true ctx (inline-skip ((ib-num-width +' 6pt) *' (float (-1))) ++ ib-num ++ inline-skip 6pt ++ ib ++ inline-fil)
+      in
+      block-frame-breakable ctx (ib-num-width +' 6pt,0pt,0pt,0pt) VDecoSet.empty f
+    )
+  in
+  lst
+  |> List.mapi map-f
+  |> List.fold-left (+++) block-nil
+
+
+end

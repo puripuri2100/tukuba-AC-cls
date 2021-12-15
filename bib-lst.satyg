@@ -1,0 +1,476 @@
+@import: bib
+@import: fonts
+
+let bib-lst = [
+  (`penken-youkou`, WebSite (|
+      authors = {|開成学園|};
+      title = {ペン剣基金助成研究公募2020};
+      url = `https://kaiseigakuen.jp/wp/wp-content/uploads/2020/06/2020_penken.pdf`;
+      year = Some(2020);
+      cited = (2021,7,28);
+    |)
+  );
+  (`exdesign`, WebSite (|
+      authors = {|Naoki Kaneko|T. Suwa|GitHub|};
+      title = {A class file easy to customize with SATySFi};
+      url = `https://github.com/puripuri2100/exdesign`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`pull#202`, WebSite (|
+      authors = {|T. Suwa|GitHub|};
+      title = {add string-explode \#202};
+      url = `https://github.com/gfngfn/SATySFi/pull/202`;
+      year = Some(2019);
+      cited = (2021,7,28);
+    |)
+  );
+  (`pull#127`, WebSite (|
+      authors = {|T. Suwa|GitHub|};
+      title = {Add string cmpare functions \#127};
+      url = `https://github.com/nyuichi/satysfi-base/pull/127`;
+      year = Some(2020);
+      cited = (2021,7,28);
+    |)
+  );
+  (`num-conversion`, WebSite (|
+      authors = {|Naoki Kaneko|GitHub|};
+      title = {SATySFi packages that convert numbers to the following notation.};
+      url = `https://github.com/puripuri2100/SATySFi-num-conversion`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`pull#200`, WebSite (|
+      authors = {|T. Suwa|GitHub|};
+      title = {Add read external file support \#200};
+      url = `https://github.com/gfngfn/SATySFi/pull/200`;
+      year = Some(2021);
+      cited = (2021,7,28);
+    |)
+  );
+  (`issue#267`, WebSite (|
+      authors = {|T. Suwa|GitHub|};
+      title = {I want to be able to set up a document information dictionary \#267};
+      url = `https://github.com/gfngfn/SATySFi/issues/267`;
+      year = Some(2021);
+      cited = (2021,7,28);
+    |)
+  );
+  (`pull#268`, WebSite (|
+      authors = {|T. Suwa|GitHub|};
+      title = {set up a document information dictionary \#268};
+      url = `https://github.com/gfngfn/SATySFi/pull/268`;
+      year = Some(2021);
+      cited = (2021,7,28);
+    |)
+  );
+  (`ruby-page`, WebSite (|
+      authors = {|W3C|};
+      title = {Ruby and Emphasis Dots ルビと圏点処理};
+      url = `https://www.w3.org/TR/jlreq/#ruby_and_emphasis_dots`;
+      year = Some(2020);
+      cited = (2021,7,28);
+    |)
+  );
+  (`satysfi-ruby`, WebSite (|
+      authors = {|Naoki Kaneko|GitHub|};
+      title = {Japanese-style ruby in SATySFi};
+      url = `https://github.com/puripuri2100/SATySFi-ruby`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`ruby-blog`, WebSite (|
+      authors = {|puripuri2100|Hatena Blog|};
+      title = {SATySFiでルビを使う～SATySFi-rubyパッケージ～};
+      url = `https://puripuri2100.hatenablog.com/entry/2020/12/01/202913`;
+      year = Some(2020);
+      cited = (2021,7,28);
+    |)
+  );
+  (`issue#220`, WebSite (|
+      authors = {|T. Suwa|GitHub|};
+      title = {Can I write various types in a dump file? \#220};
+      url = `https://github.com/gfngfn/SATySFi/issues/220`;
+      year = Some(2021);
+      cited = (2021,7,28);
+    |)
+  );
+  (`json-org`, WebSite (|
+      authors = {|json.org|};
+      title = {Introducing JSON};
+      url = `https://www.json.org/json-en.html`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`json-minefield`, WebSite (|
+      authors = {|Nicolas Seriot|};
+      title = {Parsing JSON is a Minefield\emoji{💣}};
+      url = `http://seriot.ch/parsing_json.php`;
+      year = Some(2016);
+      cited = (2021,7,28);
+    |)
+  );
+  (`json-test-repo`, WebSite (|
+      authors = {|Nicolas Seriot|GitHub|};
+      title = {A comprehensive test suite for RFC 8259 compliant JSON parsers};
+      url = `https://github.com/nst/JSONTestSuite`;
+      year = Some(2016);
+      cited = (2021,7,28);
+    |)
+  );
+  (`satysfi-json`, WebSite (|
+      authors = {|Naoki Kaneko|GitHub|};
+      title = {json parser for SATySFi};
+      url = `https://github.com/puripuri2100/SATySFi-json`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`textconf2019-slide`, WebSite (|
+      authors = {|puripuri2100|Hatena Blog|};
+      title = {TeXConf 2019の供養};
+      url = `https://puripuri2100.hatenablog.com/entry/2019/12/22/151426`;
+      year = Some(2019);
+      cited = (2021,7,28);
+    |)
+  );
+  (`textconf2019-page`, WebSite (|
+      authors = {|TeXConf 2019|};
+      title = {Second Announcement（参加登録受け付け）};
+      url = `https://texconf2019.tumblr.com/post/186806708591/second-announcement`;
+      year = Some(2019);
+      cited = (2021,7,28);
+    |)
+  );
+  (`md2latex-repo`, WebSite (|
+      authors = {|Naoki Kaneko|GitHub|};
+      title = {Convert Markdown to LaTeX with SATySFi.};
+      url = `https://github.com/puripuri2100/satysfi-md2latex`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`onlinetex2020`, WebSite (|
+      authors = {|connpass|};
+      title = {Online.tex 2020};
+      url = `https://connpass.com/event/188075/`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`onlinetex2020-slide`, WebSite (|
+      authors = {|金子尚樹|};
+      title = {SATySFiを使用したMarkdownからLaTeXへのファイル変換について};
+      url = #`   https://speakerdeck.com/puripuri2100/satysfiwoshi-yong-sitamarkdownkaralatexhefalsehuairubian-huan-nituite`;
+      year = Some(2020);
+      cited = (2021,7,28);
+    |)
+  );
+  (`satysfi-fonts-noto-emoji`, WebSite (|
+      authors = {|Naoki Kaneko|GitHub|};
+      title = {SATySFi font package for Noto Emoji fonts.};
+      url = `https://github.com/puripuri2100/SATySFi-fonts-noto-emoji`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`color-font-kaisetu`, WebSite (|
+      authors = {|\@kakinaguru_zo|Qiita|};
+      title = {LuaTeXでカラーフォント・絵文字\emoji{✌}(SVG/COLR/CBDT)};
+      url = `https://qiita.com/kakinaguru_zo/items/8a085484c7a0530e032b`;
+      year = Some(2020);
+      cited = (2021,7,28);
+    |)
+  );
+  (`svg2saty-repo`, WebSite (|
+      authors = {|Naoki Kaneko|GitHub|};
+      title = {Convert SVG file to SATySFi's file.};
+      url = `https://github.com/puripuri2100/svg2saty`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`emoji-blog`, WebSite (|
+      authors = {|puripuri2100|Hatena Blog|};
+      title = {絵文字結合を実装する};
+      url = `https://puripuri2100.hatenablog.com/entry/2020/05/06/231925`;
+      year = Some(2020);
+      cited = (2021,7,28);
+    |)
+  );
+  (`twemoji-repo`, WebSite (|
+      authors = {|twitter|GitHub|};
+      title = {Emoji for everyone. https://twemoji.twitter.com/};
+      url = `https://github.com/twitter/twemoji`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`satysfi-twemoji-repo`, WebSite (|
+      authors = {|Naoki Kaneko|GitHub|};
+      title = {[WIP] To use color emoji with SATySFi};
+      url = `https://github.com/puripuri2100/satysfi-twemoji`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`mdbook-satysfi-repo`, WebSite (|
+      authors = {|Naoki Kaneko|GitHub|};
+      title = {A mdbook backend for generating SATySFi documents.};
+      url = `https://github.com/puripuri2100/mdbook-satysfi`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`mdbook-repo`, WebSite (|
+      authors = {|The Rust Programming Language|GitHub|};
+      title = {Create book from markdown files. Like Gitbook but implemented in Rust};
+      url = `https://github.com/rust-lang/mdBook`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`rust-book`, WebSite (|
+      authors = {|Steve Klabnik|Carol Nichols|Contributions from the Rust Community|GitHub|};
+      title = {The Rust Programming Language};
+      url = `https://doc.rust-lang.org/book/`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`mdbook-guide-repo`, WebSite (|
+      authors = {|The Rust Programming Language|GitHub|};
+      title = {The Rust Programming Language};
+      url = `https://github.com/rust-lang/book`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`rust-by-example`, WebSite (|
+      authors = {|The Rust Community|};
+      title = {Rust By Example};
+      url = `https://doc.rust-lang.org/stable/rust-by-example/`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`cargo-book`, WebSite (|
+      authors = {|Alex Crichton|Steve Klabnik|Carol Nichols|Contributions from the Rust Community|};
+      title = {The Cargo Book};
+      url = `https://doc.rust-lang.org/cargo/`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`cook-book`, WebSite (|
+      authors = {|Rust Language Community|};
+      title = {Rust Cookbook};
+      url = `https://rust-lang-nursery.github.io/rust-cookbook/`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`mdbook-epub-repo`, WebSite (|
+      authors = {|Michael Bryan|GitHub|};
+      title = {An experimental mdbook backend for creating EPUB documents.};
+      url = `https://github.com/Michael-F-Bryan/mdbook-epub`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`mdbook-latex-repo`, WebSite (|
+      authors = {|Liam Beckman|GitHub|};
+      title = {An mdbook backend for generating LaTeX and PDF documents.};
+      url = `https://github.com/lbeckman314/mdbook-latex`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`satysfi-slide`, WebSite (|
+      authors = {|諏訪敬之|};
+      title = {静的型つき組版処理システムSATySFi \@第61回プログラミング・シンポジウム};
+      url = `https://www.slideshare.net/bd_gfngfn/satysfi-61`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`tectonic-repo`, WebSite (|
+      authors = {|The Tectonic Project|GitHub|};
+      title = {A modernized, complete, self-contained TeX/LaTeX engine, powered by XeTeX and TeXLive.};
+      url = `https://github.com/tectonic-typesetting/tectonic`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`pulldown-cmark-repo`, WebSite (|
+      authors = {|Raph Levien|GitHub|};
+      title = {This library is a pull parser for CommonMark, written in Rust.};
+      url = `https://github.com/raphlinus/pulldown-cmark`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`html-parser-repo`, WebSite (|
+      authors = {|Mathias|GitHub|};
+      title = {A simple and general purpose html/xhtml parser, using Pest.};
+      url = `https://github.com/mathiversen/html-parser`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`xml2saty-rust-repo`, WebSite (|
+      authors = {|Naoki Kaneko|GitHub|};
+      title = {This software converts xml file to SATySFi's document file.};
+      url = `https://github.com/puripuri2100/xml2saty-rust`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`commonmark`, WebSite (|
+      authors = {|commonmark.org|};
+      title = {CommonMark - A strongly defined, highly compatible specification of Markdown -};
+      url = `https://commonmark.org/`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`mdbook-specific`, WebSite (|
+      authors = {|The Rust Programming Language|};
+      title = {mdBook-specific features};
+      url = `https://rust-lang.github.io/mdBook/format/mdbook.html`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`mdbook-alternative-backends`, WebSite (|
+      authors = {|The Rust Programming Language|};
+      title = {Alternative Backends};
+      url = `https://rust-lang.github.io/mdBook/for_developers/backends.html`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`mdbook-satysfi-class`, WebSite (|
+      authors = {|Naoki Kaneko|GitHub|};
+      title = {A SATySFi class file for processing document file generated by mdbook-satysfi};
+      url = `https://github.com/puripuri2100/satysfi-class-mdbook-satysfi`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`mdbook-satysfi-evaluation`, WebSite (|
+      authors = {|monaqa|Twitter|};
+      title = {ツイート \@monaqa};
+      url = `https://twitter.com/mo_naqa/status/1362944222433734660`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`satysfi-conf-2020-cluster`, WebSite (|
+      authors = {|cluster|};
+      title = {SATySFi Conf 2020};
+      url = `https://cluster.mu/e/9a567d0b-a7ab-4758-8c0f-16236b36dffd`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`satysfi-conf-2020-page`, WebSite (|
+      authors = {|connpass|};
+      title = {SATySFi Conf 2020};
+      url = `https://connpass.com/event/174844/`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`satysfi-conf-2021-page`, WebSite (|
+      authors = {|connpass|};
+      title = {SATySFi Conf 2021};
+      url = `https://connpass.com/event/206277/`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`conf2021-slide`, WebSite (|
+      authors = {|金子尚樹|};
+      title = {mdbook-satysfiを作成しました};
+      url = `https://speakerdeck.com/puripuri2100/mdbook-satysfiwozuo-cheng-simasita`;
+      year = Some(2021);
+      cited = (2021,7,28);
+    |)
+  );
+  (`rust-lt-slide`, WebSite (|
+      authors = {|\@puripuri2100|};
+      title = {mdbookのプラグインを作る話};
+      url = `https://speakerdeck.com/puripuri2100/mdbookfalsepuraguinwozuo-ruhua`;
+      year = Some(2021);
+      cited = (2021,7,28);
+    |)
+  );
+  (`llmaker-repo`, WebSite (|
+      authors = {|Naoki Kaneko|GitHub|};
+      title = {Make LL(1) token parser code for Rust};
+      url = `https://github.com/puripuri2100/llmaker`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`rust-nyumon`, Book (|
+      authors = {|\latin{κ}een|河野達也|小松礼人|};
+      title = {実践Rust入門［言語仕様から開発手法まで］};
+      publisher = {技術評論社};
+      year = 2019;
+    |)
+  );
+  (`llmaker-blog`, WebSite (|
+      authors = {|puripuri2100|Hatena Blog|};
+      title = {Rust用のLL(1)トークンパーサジェネレータを作った話};
+      url = `https://puripuri2100.hatenablog.com/entry/2020/06/21/211654`;
+      year = Some(2020);
+      cited = (2021,7,28);
+    |)
+  );
+  (`satysfi-conf-youtube`, WebSite (|
+      authors = {|YouTube|};
+      title = {SATySFi Conf 2020};
+      url = `https://www.youtube.com/playlist?list=PL0VFdv9CLkQ3nAE46ZvEztjQauzH0haZb`;
+      year = Some(2020);
+      cited = (2021,7,28);
+    |)
+  );
+  (`satysfi-conf-shot`, WebSite (|
+      authors = {|zptmtr|Twitter|};
+      title = {ツイート \@zptmtr};
+      url = `https://twitter.com/zptmtr/status/1286950873088659458`;
+      year = Some(2020);
+      cited = (2021,7,28);
+    |)
+  );
+  (`dlm-repo`, WebSite (|
+      authors = {|Naoki Kaneko|GitHub|};
+      title = {電気係貸出管理ソフトウェア};
+      url = `https://github.com/puripuri2100/dlm`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`nipori-HP`, WebSite (|
+      authors = {|開成学園パズル研究部|};
+      title = {開成学園パズル研究部HP};
+      url = `https://nipori.gitlab.io/nipori`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+  (`nipori16-html`, WebSite (|
+      authors = {|開成学園パズル研究部|};
+      title = {ニポリ16号};
+      url = `https://nipori.gitlab.io/nipori/nipori16/html/nipori16.html`;
+      year = None;
+      cited = (2021,7,28);
+    |)
+  );
+]
