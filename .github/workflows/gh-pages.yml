@@ -16,7 +16,7 @@ jobs:
           export HOME=/root # workaround
           eval $(opam env)
           opam update
-          opam install satysfi-base satysfi-ruby satysfi-texlogo satysfi-uline satysfi-num-conversion
+          opam install satysfi-base satysfi-ruby satysfi-texlogo satysfi-uline satysfi-num-conversion satysfi-image
           satyrographos install
           satysfi demo.saty
       - run: |
