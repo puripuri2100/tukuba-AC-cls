@@ -14,6 +14,11 @@ make satysfi
 
 でデモファイルのコンパイルが行われます。
 
+デモファイルのPDFは
+
+- [https://puripuri2100.github.io/tukuba-AC-cls/demo.pdf](https://puripuri2100.github.io/tukuba-AC-cls/demo.pdf)
+
+で見ることができます。
 
 
 各パッケージの依存関係はこのようになっています。
