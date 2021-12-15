@@ -13,6 +13,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: |
+          sudo apt-get install graphviz -y
+      - run: |
           export HOME=/root # workaround
           eval $(opam env)
           opam update
