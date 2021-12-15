@@ -14,7 +14,7 @@ digraph graphname {
   ];
 
   std [label = "{<math>math|<gr>gr|<footnotescheme>footnote-scheme|<color>color|<annot>annot|<vdecoset>vdecoset|<code>code|<itemize>itemize}"]
-  base [label = "{<int>int|<listext>list-ext|<ord>ord}"]
+  base [label = "{<int>base/int|<listext>base/list-ext|<ord>base/ord}"]
 
   import [label = "{<bib>bib.satyh|<fonts>fonts.satyg|<bib-lst>bib-lst.satyg|<accls>ac-cls.satyh}"]
 
